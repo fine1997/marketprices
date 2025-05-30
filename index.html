@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Modern UI Container</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: transparent;
+      font-family: 'Inter', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .container-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 460px;
+    }
+    .container {
+      position: relative;
+      width: 100%;
+      max-width: 400px;
+      height: 340px;
+      margin-top: 20px;
+      perspective: 1000px;
+    }
+    .text-container {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      padding: 28px;
+      border-radius: 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      transition: all 1s ease-in-out;
+      transform-origin: center bottom;
+      word-break: break-word;
+      opacity: 0;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    }
+    #container1 { background: white; color: #007BFF; border: 1.5px solid rgba(0, 123, 255, 0.3); }
+    #container2 { background: white; color: #007BFF; border: 1.5px solid rgba(255, 193, 7, 0.3); }
+    #container3 { background: white; color: #FF5722; border: 1.5px solid rgba(255, 87, 34, 0.3); }
+    .text-line { font-size: 20px; font-weight: 600; margin: 6px 0; }
+    #container1 .text-line { -webkit-text-stroke: 0.6px #003b7a; }
+    #container2 .text-line { -webkit-text-stroke: 0.6px #a36e00; }
+    #container3 .text-line { -webkit-text-stroke: 0.6px #9e2a00; }
+    .show { z-index: 3; transform: translateZ(60px); opacity: 1; }
+    .middle { z-index: 2; transform: translateY(-55px) translateZ(40px) scale(0.96); opacity: 0.95; }
+    .back { z-index: 1; transform: translateY(-100px) translateZ(20px) scale(0.92); opacity: 0.9; }
+    @media (max-width: 480px) {
+      .container { max-width: 90%; height: 300px; }
+      .text-container { padding: 20px; border-radius: 24px; }
+      .text-line { font-size: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container-wrapper">
+    <div class="container">
+      <!-- Container 1: API Data -->
+      <div class="text-container" id="container1">
+        <div class="text-line" id="keytitle">Loading...</div>
+        <div class="text-line" id="keyclass"></div>
+        <div class="text-line" id="sayclass"></div>
+        <div class="text-line" id="saybclass"></div>
+      </div>
+
+      <!-- Container 2 -->
+      <div class="text-container" id="container2">
+        <div class="text-line">ကမ္ဘာ့ရွှေဈေး - $3,303</div>
+        <div class="text-line">၁၅ပဲရည် - 7,190,000 MMK</div>
+        <div class="text-line">၁၆ပဲရည် - 7,640,000 MMK</div>
+        <div class="text-line">ဒီဇယ် - 2,440 MMK</div>
+        <div class="text-line">ဓာတ်ဆီ 95 - 2,925 MMK</div>
+      </div>
+
+      <!-- Container 3 -->
+      <div class="text-container" id="container3">
+        <div class="text-line">မိုးလေဝသအခြေအနေ</div>
+        <div class="text-line">မန္တလေး - မိုးအနည်းငယ်ရွာ</div>
+        <div class="text-line">ရန်ကုန် - ညနေ/ညပိုင်း မိုးများ</div>
+        <div class="text-line">ဧရာဝတီ - မိုးကြီး၊ မိုးကြိုး</div>
+        <div class="text-line">နေပြည်တော် - မိုးနည်း</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const containers = [
+      document.getElementById('container1'),
+      document.getElementById('container2'),
+      document.getElementById('container3')
+    ];
+    let currentIndex = 0;
+
+    function updateContainers() {
+      containers.forEach((container, index) => {
+        container.classList.remove('show', 'middle', 'back');
+        const pos = (index - currentIndex + containers.length) % containers.length;
+        if (pos === 0) container.classList.add('show');
+        else if (pos === 1) container.classList.add('middle');
+        else container.classList.add('back');
+      });
+    }
+
+    function nextContainer() {
+      currentIndex = (currentIndex + 1) % containers.length;
+      updateContainers();
+    }
+
+    updateContainers();
+    setInterval(nextContainer, 10000);
+
+    function fetchAPIData() {
+      fetch('https://api.allorigins.win/get?url=' + encodeURIComponent('https://fine1997.github.io/keyapi/'))
+        .then(res => res.json())
+        .then(result => {
+          const html = result.contents;
+          const doc = new DOMParser().parseFromString(html, 'text/html');
+
+          const getText = selector => doc.querySelector(selector)?.innerText || 'မရှိပါ';
+
+          document.getElementById('keytitle').innerText = getText('.keytitle');
+          document.getElementById('keyclass').innerText = getText('.keyclass');
+          document.getElementById('sayclass').innerText = getText('.say');
+          document.getElementById('saybclass').innerText = getText('.sayb');
+        })
+        .catch(err => {
+          console.error('Error fetching API:', err);
+          document.getElementById('keytitle').innerText = 'API fetch error';
+          document.getElementById('keyclass').innerText = '';
+          document.getElementById('sayclass').innerText = '';
+          document.getElementById('saybclass').innerText = '';
+        });
+    }
+
+    fetchAPIData();           // Initial fetch on page load
+    setInterval(fetchAPIData, 30000);  // Fetch every 30 seconds
+  </script>
+</body>
+</html>
